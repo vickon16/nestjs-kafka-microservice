@@ -12,6 +12,7 @@ import { kafkaConstants } from '@app/common';
         transport: Transport.KAFKA,
         options: {
           client: {
+            clientId: kafkaConstants.clientIds.PAYMENT_SERVICE,
             brokers: kafkaConstants.brokers,
           },
         },

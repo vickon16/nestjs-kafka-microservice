@@ -1,6 +1,12 @@
 import { Controller, Inject } from '@nestjs/common';
 import { AppService } from './app.service';
-import { ClientKafka, MessagePattern, Payload } from '@nestjs/microservices';
+import {
+  ClientKafka,
+  Ctx,
+  EventPattern,
+  KafkaContext,
+  Payload,
+} from '@nestjs/microservices';
 import { kafkaConstants, type Order } from '@app/common';
 
 @Controller()
@@ -11,9 +17,13 @@ export class AppController {
     private readonly kafkaClient: ClientKafka,
   ) {}
 
-  @MessagePattern(kafkaConstants.topics.PROCESS_PAYMENT)
-  handleProcessPayment(@Payload() order: Order) {
-    console.log('[Payment-Service]: Payment in process', order);
+  @EventPattern(kafkaConstants.topics.PROCESS_PAYMENT)
+  handleProcessPayment(@Payload() order: Order, @Ctx() context: KafkaContext) {
+    console.log(
+      '[Payment-Service]: Payment in process',
+      order,
+      context.getMessage().timestamp,
+    );
 
     // Simulate processing the payment
 

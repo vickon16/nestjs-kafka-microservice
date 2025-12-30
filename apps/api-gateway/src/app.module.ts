@@ -12,7 +12,15 @@ import { kafkaConstants } from '@app/common';
         transport: Transport.KAFKA,
         options: {
           client: {
+            clientId: kafkaConstants.clientIds.API_GATEWAY,
             brokers: kafkaConstants.brokers,
+          },
+          producer: {
+            allowAutoTopicCreation: true,
+          },
+          consumer: {
+            groupId: kafkaConstants.groupIds.API_GATEWAY,
+            allowAutoTopicCreation: true,
           },
         },
       },

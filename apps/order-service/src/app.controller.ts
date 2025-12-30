@@ -1,23 +1,32 @@
-import { Controller, Inject } from '@nestjs/common';
-import { AppService } from './app.service';
-import { ClientKafka, MessagePattern, Payload } from '@nestjs/microservices';
 import { kafkaConstants, type Order } from '@app/common';
+import { Controller } from '@nestjs/common';
+import {
+  Ctx,
+  EventPattern,
+  KafkaContext,
+  MessagePattern,
+  Payload,
+} from '@nestjs/microservices';
+import { AppService } from './app.service';
 
 @Controller()
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    @Inject(kafkaConstants.serviceName)
-    private readonly kafkaClient: ClientKafka,
-  ) {}
+  constructor(private readonly appService: AppService) {}
 
-  @MessagePattern(kafkaConstants.topics.ORDER_CREATED)
-  handleOrderCreated(@Payload() order: Order) {
-    console.log('[Order-Service]: Received new order', order);
+  @EventPattern(kafkaConstants.topics.ORDER_CREATED)
+  handleOrderCreated(@Payload() order: Order, @Ctx() context: KafkaContext) {
+    console.log(
+      '[Order-Service]: Received new order',
+      order,
+      context.getMessage().timestamp,
+    );
 
-    // Simulate processing the order
+    this.appService.handleOrderCreated(order);
+  }
 
-    // After processing, emit an event to process payment
-    this.kafkaClient.emit(kafkaConstants.topics.PROCESS_PAYMENT, order);
+  @MessagePattern(kafkaConstants.topics.GET_ORDERS)
+  handleGetOrders(): Order[] {
+    console.log('Here');
+    return this.appService.getOrders();
   }
 }
